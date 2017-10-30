@@ -7,6 +7,9 @@ class ArticleModel {
     public function __construct() {
         try {
             $this->_db = new PDO('mysql:dbname=yaf_api;host=127.0.0.1', 'root', '');
+
+            $this->_db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false); //禁用预处理
+            $this->_db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false); //取出来的东西不要转换类型
         } catch (PDOException $e) {
             echo 'Connection failed: ' . $e->getMessage();
         }
@@ -69,6 +72,83 @@ class ArticleModel {
                 ]);
                 return $aid;
             }
+        }
+    }
+
+    public function status($aid, $status) {
+        $query = $this->_db->prepare('update yaf_article set isdelete = ? where id = ?');
+        $result = $query->execute([$status, $aid]); //更新语句这个就能出结果，返回布尔值，成功true， 失败false
+        if ($result) {
+            return true;
+        } else {
+            $this->errno = '';
+            $this->errmsg = $query->errorInfo();
+            return false;
+        }
+    }
+
+    public function info($aid)
+    {
+        $query = $this->_db->prepare( 'select * from yaf_article where id = ?');
+        $query->execute([$aid]);
+        $result = $query->fetchAll();
+        $result = $result[0];  //这个获取错误，或者获取失败，直接返回null
+        if (!$result) {
+            $this->errno = '';
+            $this->errmsg = $query->errorInfo();
+            return false;
+        } else {
+            return $result;
+        }
+    }
+
+    //感觉删除状态还是和文章状态分开来比较好，zz,有个默认where条件比较好拼装
+    public function get($page, $pageSize, $status, $cate)
+    {
+        $where_arr = [];
+        $sql = 'select * from yaf_article ';
+        if ($status != -1 || $cate != -1) {
+            $sql .= ' where ';
+            if ($status != -1) {
+                $sql .= ' isdelete = ? and';
+                array_push($where_arr, $status);
+            }
+            if ($cate != -1) {
+                $sql .= ' cate = ? and';
+                array_push($where_arr, $cate);
+            }
+            $sql = trim($sql, 'and ');
+        }
+        $offset = ($page - 1) * $pageSize;
+        $sql .= ' order by id desc limit ? offset ?';
+        array_push($where_arr, intval($pageSize));
+        array_push($where_arr, $offset);
+
+        $query = $this->_db->prepare($sql);
+//        $sql = $query->debugDumpParams();
+//        var_dump($sql);
+        $query->execute($where_arr);
+        $result = $query->fetchAll();
+        if (!$result) {
+            $this->errno = '';
+            $this->errmsg = $query->errorInfo();
+            return false;
+        } else {
+            return $result;
+        }
+
+    }
+
+    public function getCate($cate) {
+        $query = $this->_db->prepare('select catename from yaf_cate where id = ? and isdelete = 0');
+        $query->execute([$cate]);
+        $cate = $query->fetchAll();
+        if (!$cate) {
+            $this->errno = '';
+            $this->errmsg = $query->errorInfo();
+            return false;
+        } else {
+            return $cate[0];
         }
     }
 
