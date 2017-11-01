@@ -44,12 +44,15 @@ class UserController extends Yaf_Controller_Abstract {
         } else {
             session_start();
             $_SESSION['userid'] = $result;
-            $_SESSION['user_token'] = md5('cy'.$_SESSION['REQUEST_TIME'].$result);
-            $_SESSION['request_time'] = $_SESSION['REQUEST_TIME'];
+            $_SESSION['user_token'] = md5('cy'.time().$result);
+
+            $_SESSION['login_time'] = time();
+
 
             echo json_encode([
                 'errno'=>7,
-                'errmsg'=>'登录成功'
+                'errmsg'=>'登录成功',
+                'data'=>$_SESSION['userid']
                 ]);
             return true;
         }

