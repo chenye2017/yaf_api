@@ -20,6 +20,16 @@ class ComposerStaticInit982fa726d097263c659c4d87521ab9b1
         ),
     );
 
+    public static $prefixesPsr0 = array (
+        'C' => 
+        array (
+            'Curl' => 
+            array (
+                0 => __DIR__ . '/..' . '/curl/curl/src',
+            ),
+        ),
+    );
+
     public static $classMap = array (
         'Nette\\ArgumentOutOfRangeException' => __DIR__ . '/..' . '/nette/utils/src/Utils/exceptions.php',
         'Nette\\Bridges\\MailDI\\MailExtension' => __DIR__ . '/..' . '/nette/mail/src/Bridges/MailDI/MailExtension.php',
@@ -80,6 +90,7 @@ class ComposerStaticInit982fa726d097263c659c4d87521ab9b1
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit982fa726d097263c659c4d87521ab9b1::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit982fa726d097263c659c4d87521ab9b1::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit982fa726d097263c659c4d87521ab9b1::$prefixesPsr0;
             $loader->classMap = ComposerStaticInit982fa726d097263c659c4d87521ab9b1::$classMap;
 
         }, null, ClassLoader::class);

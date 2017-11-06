@@ -51,8 +51,8 @@ class UserController extends Yaf_Controller_Abstract {
 
             echo json_encode([
                 'errno'=>7,
-                'errmsg'=>'登录成功',
-                'data'=>$_SESSION['userid']
+                'errmsg'=>'',
+                'data'=>['userid'=>$_SESSION['userid'], 'username'=>$username]
                 ]);
             return true;
         }
@@ -87,9 +87,9 @@ class UserController extends Yaf_Controller_Abstract {
 		    echo json_encode([
 		        'errno'=>2,
                 'errmsg'=>'',
-                'data'=>['username'=>$username]
+                'data'=>['username'=>$username, 'password'=>$password]
             ]);
-		    return true;
+		    return false;    //yaf框架好像这里只能是return false ，要不然都会找模板，报错信息
         }
 	}
 }
