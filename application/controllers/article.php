@@ -15,7 +15,8 @@ class ArticleController extends Yaf_Controller_Abstract
     public function addAction()
     {
         //验证是否有权限增加和调用接口渠道是否正确
-        $isAdmin = $this->_checkAdmin();
+        //$isAdmin = $this->_checkAdmin();
+        $isAdmin = Admin_object::isAdmin();
         $submit = $this->getRequest()->getPost('submit', 0); //getQuery竟然跟获取不到post方式提交的参数，因为他是获取get方式提交的参数
 
         if (!$isAdmin) {
@@ -71,7 +72,8 @@ class ArticleController extends Yaf_Controller_Abstract
     public function editAction()
     {
         //验证是否有权限增加和调用接口渠道是否正确
-        $isAdmin = $this->_checkAdmin();
+        //$isAdmin = $this->_checkAdmin();
+        $isAdmin = Admin_object::isAdmin();
         $submit = $this->getRequest()->getPost('submit', 0);
 
         if (!$isAdmin) {
@@ -139,7 +141,8 @@ class ArticleController extends Yaf_Controller_Abstract
     public function statusAction()
     {
         //验证是否有权限增加和调用接口渠道是否正确
-        $isAdmin = $this->_checkAdmin();
+        //$isAdmin = $this->_checkAdmin();
+        $isAdmin = Admin_object::isAdmin();
         $submit = $this->getRequest()->getPost('submit', 0);
         $aid = $this->getRequest()->getPost('aid', 0);
         $status = $this->getRequest()->getPost('status', 0);
@@ -287,8 +290,8 @@ class ArticleController extends Yaf_Controller_Abstract
     }
 
 
-    private function _checkAdmin()
+    /*private function _checkAdmin()
     {
         return true;  //没有写具体的验证方法
-    }
+    }*/
 }

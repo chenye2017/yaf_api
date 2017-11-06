@@ -87,7 +87,7 @@ class WpModel {
         $input->SetBody($item_info[0]['name']);
         $input->SetAttach($billId);
         $input->SetOut_trade_no(WxPayConfig::MCHID.date("YmdHis"));
-        $input->SetTotal_fee("1");
+        $input->SetTotal_fee("2");
         $input->SetTime_start(date("YmdHis"));
         $input->SetTime_expire(date("YmdHis", time() + 86400*3));
         $input->SetGoods_tag($item_info[0]['name']);
