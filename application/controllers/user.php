@@ -31,8 +31,15 @@ class UserController extends Yaf_Controller_Abstract {
             return false;
         }
 
-        $userModel = new userModel();
-        $result = $userModel->login($username, $password);
+        //对于model层加上异常处理
+        try {
+            $userModel = new userModel();
+            $result = $userModel->login($username, $password);
+        } catch (Exception $e) {
+            list($errno, $errmsg) = Err_map::getCodeMessage(1002);
+            echo Common_Request::response($errno, $errmsg);
+            return false;
+        }
         if (!$result) {
             echo Common_Request::response($userModel->errno, $userModel->errmsg);
             return false;
@@ -66,9 +73,15 @@ class UserController extends Yaf_Controller_Abstract {
 		    echo Common_Request::response($errno, $errmsg); //数组转换成json格式传输
 		    return false; //为了不去找视图层
         }
-
-		$userModel = new UserModel();
-		if (!$userModel->register(trim($username), trim($password))) {
+        try {
+            $userModel = new UserModel();
+            $reg_result = $userModel->register(trim($username), trim($password)); //这个之前是直接用在if当中，但感觉要做异常处理提取出来了
+        } catch (Exception $e) {
+            list($errno, $errmsg) = Err_map::getCodeMessage(1009);
+            echo Common_Request::response($errno, $errmsg); //数组转换成json格式传输
+            return false; //为了不去找视图层
+        }
+		if (!$reg_result) {
 		    echo Common_Request::response($userModel->errno, $userModel->errmsg);
 		    return false;
         } else {
