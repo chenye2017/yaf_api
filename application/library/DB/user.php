@@ -6,8 +6,7 @@ class DB_user extends DB_base {
         $count = $query->fetchAll();
 
         if ($count[0]['c'] != 0) {
-            self::$errno = '';
-            self::$errmsg = '用户名已经存在';
+
             return false;
         }
 
@@ -18,8 +17,7 @@ class DB_user extends DB_base {
         $query = self::$db->prepare("insert into yaf_user(id, username, password, reg_time) values(null,?,?,?)");
         $result = $query->execute([$username, Common_Password::generatePwd(($password)), $reg_time]);
         if (!$result) {
-            self::$errno = 5;
-            self::$errmsg = '写入数据失败';
+            list(self::$errno, self::$errmsg) = Err_map::getCodeMessage(1005);
             return false;
         }
         return true;
@@ -30,16 +28,14 @@ class DB_user extends DB_base {
         $query->execute([$username]);
         $pd = $query->fetchAll();
         if (!$pd) {
-            self::$errno = '';
-            self::$errmsg = '用户名不存在';
+            list(self::$errno, self::$errmsg) = Err_map::getCodeMessage(1006);
             return false;
         }
         if ($password != '123456') {
             $password = Common_Password::generatePwd(($password));
 
             if ($password != $pd[0]['password']) {
-                self::$errno = 9;
-                self::$errmsg = '密码不正确';
+                list(self::$errno, self::$errmsg) = Err_map::getCodeMessage(1007);
                 return false;
             }
         }

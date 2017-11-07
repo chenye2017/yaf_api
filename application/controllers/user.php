@@ -20,12 +20,14 @@ class UserController extends Yaf_Controller_Abstract {
         $submit = Common_Request::post('submit', 0); //为了防止爬虫，其实人为看一下多传递个参数就可以了，但post传递的参数好像看不到
 
         if ($submit != 1) {
-            echo Common_Request::response('', '请通过正常渠道提交');
+            list($errno, $errmsg) = Err_map::getCodeMessage(1001);
+            echo Common_Request::respons($errno, $errmsg);
             return false;
         }
 
         if (!$username || !$password) {
-            echo Common_Request::response('', '用户名或者密码必须传递');
+            list($errno, $errmsg) = Err_map::getCodeMessage(1002);
+            echo Common_Request::response($errno, $errmsg);
             return false;
         }
 
@@ -40,8 +42,8 @@ class UserController extends Yaf_Controller_Abstract {
             $_SESSION['user_token'] = md5('cy'.time().$result);
 
             $_SESSION['login_time'] = time();
-
-            echo Common_Request::response('', '', ['userid'=>$_SESSION['userid'], 'username'=>$username]);
+            list($errno, $errmsg) = Err_map::getCodeMessage(0);
+            echo Common_Request::response($errno, $errmsg, ['userid'=>$_SESSION['userid'], 'username'=>$username]);
             return false;
         }
 
@@ -60,7 +62,8 @@ class UserController extends Yaf_Controller_Abstract {
         //验证参数
 
 		if (!$username || !$password) {
-		    echo Common_Request::response('', '用户名或者密码必须传递'); //数组转换成json格式传输
+            list($errno, $errmsg) = Err_map::getCodeMessage(1003);
+		    echo Common_Request::response($errno, $errmsg); //数组转换成json格式传输
 		    return false; //为了不去找视图层
         }
 
@@ -69,7 +72,8 @@ class UserController extends Yaf_Controller_Abstract {
 		    echo Common_Request::response($userModel->errno, $userModel->errmsg);
 		    return false;
         } else {
-		    echo Common_Request::response('', '', ['username'=>$username, 'password'=>$password]);
+            list($errno, $errmsg) = Err_map::getCodeMessage(0);
+		    echo Common_Request::response($errno, $errmsg, ['username'=>$username, 'password'=>$password]);
 		    return false;    //yaf框架好像这里只能是return false ，要不然都会找模板，报错信息
         }
 	}
