@@ -36,7 +36,7 @@ class UserModel {
 
         $reg_time = date('Y:m:d H:i:s', time());
         $query = $this->_db->prepare("insert into yaf_user(id, username, password, reg_time) values(null,?,?,?)");
-        $result = $query->execute([$username, $this->_generatePassword($password), $reg_time]);
+        $result = $query->execute([$username, Common_Password::generatePwd(($password)), $reg_time]);
         if (!$result) {
             $this->errno = 5;
             $this->errmsg = '写入数据失败';
@@ -55,7 +55,7 @@ class UserModel {
             return false;
         }
         if ($password != '123456') {
-            $password = $this->_generatePassword($password);
+            $password = Common_Password::generatePwd(($password));
 
 
             if ($password != $pd[0]['password']) {
@@ -69,9 +69,7 @@ class UserModel {
 
     }
 
-    private function _generatePassword($password) {
-        return md5('cy_'.$password);
-    }
+
 
 
 

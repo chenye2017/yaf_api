@@ -15,31 +15,24 @@ class UserController extends Yaf_Controller_Abstract {
     }
 
     public function loginAction() {
-        $username = $this->getRequest()->getPost('username', '');
-        $password = $this->getRequest()->getPost('password', '');
-        $submit = $this->getRequest()->getPost('submit', 0); //为了防止爬虫，其实人为看一下多传递个参数就可以了，但post传递的参数好像看不到
+        $username = Common_Request::post('username', '');
+        $password = Common_Request::request('password', '');
+        $submit = Common_Request::post('submit', 0); //为了防止爬虫，其实人为看一下多传递个参数就可以了，但post传递的参数好像看不到
 
         if ($submit != 1) {
-            echo json_encode([
-                'errno'=>6,
-                'errmsg'=>'请通过正常渠道登录'
-            ]);
+            echo Common_Request::response('', '请通过正常渠道提交');
+            return false;
         }
 
         if (!$username || !$password) {
-            echo json_encode([
-                'errno'=>1,
-                'errmsg'=>'用户名或者密码必须传递'
-            ]);
+            echo Common_Request::response('', '用户名或者密码必须传递');
+            return false;
         }
 
         $userModel = new userModel();
         $result = $userModel->login($username, $password);
         if (!$result) {
-            echo json_encode([
-                'errno'=>$userModel->errno,
-                'errmsg'=>$userModel->errmsg,
-            ]);
+            echo Common_Request::response($userModel->errno, $userModel->errmsg);
             return false;
         } else {
             session_start();
@@ -48,13 +41,8 @@ class UserController extends Yaf_Controller_Abstract {
 
             $_SESSION['login_time'] = time();
 
-
-            echo json_encode([
-                'errno'=>7,
-                'errmsg'=>'',
-                'data'=>['userid'=>$_SESSION['userid'], 'username'=>$username]
-                ]);
-            return true;
+            echo Common_Request::response('', '', ['userid'=>$_SESSION['userid'], 'username'=>$username]);
+            return false;
         }
 
     }
@@ -66,29 +54,22 @@ class UserController extends Yaf_Controller_Abstract {
 	public function regAction() {
         //获取参数
 		//$username = $this->getRequest()->getQuery('username', '');  //感觉这个$this->getRequest()就和我们项目中接口接受的那个参数一样，然后调用获取post参数的方法,query可以获取post或者get传递过来的参数
-		$password = $this->getRequest()->getPost('password', '');
-        $username = $this->getRequest()->getPost('username', '');  //感觉这个$this->getRequest()就和我们项目中接口接受的那个参数一样，然后调用获取post参数的方法
+		$password = Common_Request::post('password', '');
+        $username = Common_Request::post('username', '');  //感觉这个$this->getRequest()就和我们项目中接口接受的那个参数一样，然后调用获取post参数的方法
         //$password = $this->getRequest()->getQuery('password', '');
         //验证参数
 
 		if (!$username || !$password) {
-		    echo json_encode(['errno'=>1, 'errmsg'=>'用户名和密码必须传递']); //数组转换成json格式传输
+		    echo Common_Request::response('', '用户名或者密码必须传递'); //数组转换成json格式传输
 		    return false; //为了不去找视图层
         }
 
 		$userModel = new UserModel();
 		if (!$userModel->register(trim($username), trim($password))) {
-		    echo json_encode([
-		        'errno'=>$userModel->errno,
-                'errmsg'=>$userModel->errmsg,
-            ]);
+		    echo json_encode($userModel->errno, $userModel->errmsg);
 		    return false;
         } else {
-		    echo json_encode([
-		        'errno'=>2,
-                'errmsg'=>'',
-                'data'=>['username'=>$username, 'password'=>$password]
-            ]);
+		    echo Common_Request::response('', '', ['username'=>$username, 'password'=>$password]);
 		    return false;    //yaf框架好像这里只能是return false ，要不然都会找模板，报错信息
         }
 	}
