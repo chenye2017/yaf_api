@@ -66,7 +66,7 @@ class UserController extends Yaf_Controller_Abstract {
 
 		$userModel = new UserModel();
 		if (!$userModel->register(trim($username), trim($password))) {
-		    echo json_encode($userModel->errno, $userModel->errmsg);
+		    echo Common_Request::response($userModel->errno, $userModel->errmsg);
 		    return false;
         } else {
 		    echo Common_Request::response('', '', ['username'=>$username, 'password'=>$password]);

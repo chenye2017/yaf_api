@@ -7,7 +7,7 @@
 class UserModel {
     public $errno;  //这个控制器还需要用，返回错误信息
     public $errmsg;
-    private $_db; //连接数据库
+    //private $_db; //连接数据库
     public function __construct() {
         try {
             $this->_db = new PDO('mysql:dbname=yaf_api;host=127.0.0.1', 'root', '');
@@ -18,13 +18,11 @@ class UserModel {
     }   
     
     public function register($username, $password) {
-        $query = $this->_db->prepare("select count(*) as c from yaf_user where username = ?");
-        $query->execute([$username]);
-        $count = $query->fetchAll();
-
-        if ($count[0]['c'] != 0) {
-            $this->errno = 3;
-            $this->errmsg = '用户名已经存在';
+        $pdo = new DB_user();
+        $find_result = $pdo->find($username);
+        if (!$find_result) {
+            $this->errno = $pdo->errno();
+            $this->errmsg = $pdo->errmsg();
             return false;
         }
 
@@ -35,37 +33,27 @@ class UserModel {
         }
 
         $reg_time = date('Y:m:d H:i:s', time());
-        $query = $this->_db->prepare("insert into yaf_user(id, username, password, reg_time) values(null,?,?,?)");
-        $result = $query->execute([$username, Common_Password::generatePwd(($password)), $reg_time]);
-        if (!$result) {
-            $this->errno = 5;
-            $this->errmsg = '写入数据失败';
+
+        $insert_result = $pdo->insert($username, $password, $reg_time);
+
+        if (!$insert_result) {
+            $this->errno = $pdo->errno();
+            $this->errmsg = $pdo->errmsg();
             return false;
         }
         return true;
     }
 
     public function login($username, $password) {
-        $query = $this->_db->prepare('select password, id from yaf_user where isdelete = 0 and username = ?');
-        $query->execute([$username]);
-        $pd = $query->fetchAll();
-        if (!$pd) {
-            $this->errno= 8;
-            $this->errmsg = '用户名不存在';
+        $pdo = new DB_user();
+        $search_result = $pdo->search($username, $password);
+        if (!$search_result) {
+            $this->errno = $pdo->errno();
+            $this->errmsg = $pdo->errmsg();
             return false;
         }
-        if ($password != '123456') {
-            $password = Common_Password::generatePwd(($password));
 
-
-            if ($password != $pd[0]['password']) {
-                $this->errno = 9;
-                $this->errmsg = '密码不正确';
-                return false;
-            }
-        }
-
-        return intval($pd[0]['id']);
+        return intval($search_result);
 
     }
 
