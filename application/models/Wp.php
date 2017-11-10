@@ -10,56 +10,52 @@ class WpModel {
     public $errmsg;
     private $_db; //连接数据库
     public function __construct() {
-        try {
+        /*try {
             $this->_db = new PDO('mysql:dbname=yaf_api;host=127.0.0.1', 'root', '');
         } catch (PDOException $e) {
             echo 'Connection failed: ' . $e->getMessage();
-        }
+        }*/
 
     }
 
     public function createbill($pid, $userid) {
-        $query = $this->_db->prepare("select stock, etime from yaf_item where id = ?");
-        $query->execute([$pid]);
-        $count = $query->fetchAll();
+        $_db = new DB_wp();
 
-        if (!$count) {
-            $this->errno = '';
-            $this->errmsg = '商品不存在';
+        $checkItemInfo = $_db->searchItem($pid);
+
+        if (!$checkItemInfo) {
+            $this->errno = $_db->errno();
+            $this->errmsg = $_db->errmsg();
             return false;
         }
 
-        if ($count[0]['stock'] < 1) {
-            $this->errno = '';
-            $this->errmsg = '商品库存不足';
+        try {
+            $_db->beginTransaction();
+
+            $reduceC = $_db->reduceItem($pid, $checkItemInfo);
+
+            if (!$reduceC) {
+                $this->errno = $_db->errno();
+                $this->errmsg = $_db->errmsg();
+                throw new PDOException($_db->errmsg());
+            }
+
+            $cid = $_db->createBill($pid, $userid);
+
+            if (!$cid) {
+                $this->errno = $_db->errno();
+                $this->errmsg = $_db->errmsg();
+                throw new PDOException($_db->errmsg());
+            }
+
+            $_db->commit();
+        } catch (PDOException $e) {
+            $_db->rollBack();
+            list($this->errno, $this->errmsg) = [2009, $e->getMessage()];
             return false;
         }
 
-        if (strtotime($count[0]['etime']) < time()) {
-            $this->errno = '';
-            $this->errmsg = '商品已经过期了';
-            return false;
-        }
-
-        $query = $this->_db->prepare("insert into yaf_bill(itemid, uid, status) values(?,?,?)");
-        $result = $query->execute([$pid, $userid, 0]);
-        if (!$result) {
-            $this->errno = '';
-            $this->errmsg = '写入数据失败';
-            return false;
-        }
-
-        $bill_id = $this->_db->lastInsertId();
-
-        $query = $this->_db->prepare('update yaf_item set stock = ? where id = ?');
-        $stock = $count[0]['stock'] - 1;
-        $result = $query->execute([$stock, $pid]);
-        if (!$result) {
-            $this->errno = '';
-            $this->errmsg = '减少商品库存失败';
-        }
-
-        return $bill_id;
+        return $cid;
     }
 
     public function qrcode($billId)

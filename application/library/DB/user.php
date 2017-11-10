@@ -6,7 +6,7 @@ class DB_user extends DB_base {
         $count = $query->fetchAll();
 
         if ($count[0]['c'] != 0) {
-
+            list(self::$errno, self::$errmsg) = Err_map::getCodeMessage(1004);
             return false;
         }
 

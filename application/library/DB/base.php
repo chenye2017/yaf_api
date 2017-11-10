@@ -19,4 +19,19 @@ class DB_base {
     public function errmsg() {
         return self::$errmsg;
     }
+
+    public function beginTransaction()
+    {
+        self::$db->beginTransaction();
+    }
+
+    public function commit()
+    {
+        self::$db->commit();
+    }
+
+    public function rollBack()
+    {
+        self::$db->rollBack();
+    }
 }
